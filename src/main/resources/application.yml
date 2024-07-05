@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    mysql_one:
+      url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/test
+      username: root
+      password: password
+
+  batch:
+    jdbc:
+      initialize-schema: ALWAYS

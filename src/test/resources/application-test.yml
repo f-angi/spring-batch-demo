@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    mysql_one:
+      url: jdbc:h2:mem:test
+      username: sa
+      password:
