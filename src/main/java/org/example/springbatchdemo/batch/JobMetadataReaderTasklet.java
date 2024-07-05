@@ -2,45 +2,43 @@ package org.example.springbatchdemo.batch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.*;
+import org.example.springbatchdemo.metadata.JobMetadata;
+import org.example.springbatchdemo.metadata.JobMetadataDb;
+import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.List;
-
-@RequiredArgsConstructor
 @Slf4j
 @Component
-public class CountryReaderTasklet implements Tasklet, StepExecutionListener {
+@RequiredArgsConstructor
+public class JobMetadataReaderTasklet implements Tasklet, StepExecutionListener {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final RowMapper<Country> rowMapper;
-    private List<Country> countryList;
+    private final JobMetadataDb jobMetadataDb;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        this.countryList = jdbcTemplate.query("SELECT * FROM country", rowMapper);
-        this.countryList.forEach(c -> log.info("Country: {}", c.getIso()));
+        JobMetadata jobMetadata = jobMetadataDb.read(chunkContext.getStepContext().getJobName());
+        chunkContext.getStepContext().getStepExecution().getJobExecution().getExecutionContext().put("lastProcessedRow", jobMetadata.getLastProcessedRow());
         return RepeatStatus.FINISHED;
     }
 
-    @Override
-    public void beforeStep(StepExecution stepExecution) {
-        stepExecution.getJobExecution().getExecutionContext().put("elapsedTime", 0);
-    }
+//    @Override
+//    public void beforeStep(StepExecution stepExecution) {
+//    }
 
-    @Override
-    public ExitStatus afterStep(StepExecution stepExecution) {
-        stepExecution.getJobExecution().getExecutionContext().put("countryListSize", this.countryList.size());
-        return ExitStatus.COMPLETED;
-    }
+//    @Override
+//    public ExitStatus afterStep(StepExecution stepExecution) {
+//        stepExecution.getJobExecution().getExecutionContext().put("last", this.countryList.size());
+//        return ExitStatus.COMPLETED;
+//    }
 
     public Step getStep(JobRepository jobRepository,
                         PlatformTransactionManager transactionManager) {

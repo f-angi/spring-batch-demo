@@ -1,7 +1,11 @@
 spring:
   datasource:
-    mysql_one:
+    mysql-one:
       url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/test
+      username: root
+      password: password
+    mysql-batch:
+      url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/spring-batch
       username: root
       password: password
 
