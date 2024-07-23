@@ -1,6 +1,6 @@
 package org.example.springbatchdemo;
 
-import org.example.springbatchdemo.batch.TimeExpiredException;
+import org.example.springbatchdemo.exception.TimeExpiredException;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -8,7 +8,7 @@ import java.time.Instant;
 @Component
 public class ElapsedTimeMonitoring {
 
-    public static final long MAX_ALLOWED_TIME_MS = 10_000;
+    public static final long MAX_ALLOWED_TIME_MS = 30_000;
 
     private long t;
 

@@ -1,12 +1,11 @@
 package org.example.springbatchdemo.batch;
 
 import org.example.springbatchdemo.ElapsedTimeMonitoring;
+import org.example.springbatchdemo.exception.TimeExpiredException;
 import org.springframework.batch.item.*;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 
@@ -25,7 +24,6 @@ public class CountryItemReader implements ItemStream, ItemReader<Country> {
                 .sql(SQL + lastProcessedRow)
                 .rowMapper(rowMapper)
                 .build();
-        var x = 1;
     }
 
     @Override

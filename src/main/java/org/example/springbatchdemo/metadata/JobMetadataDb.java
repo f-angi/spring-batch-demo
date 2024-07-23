@@ -20,22 +20,19 @@ public class JobMetadataDb {
 
     public JobMetadata read(String jobName) {
         try {
-            return jdbcTemplate.queryForObject("select * from job_metadata where job_name = ?", JobMetadata.class, jobName);
+            return jdbcTemplate.queryForObject("select * from job_metadata where job_name = ?", new Object[]{jobName}, rowMapper);
         } catch (EmptyResultDataAccessException e) {
             return new JobMetadata(jobName, 0);
         }
-
-
-
     }
 
     // TODO insert on duplicate
     public void write(JobMetadata jobMetadata) {
         try {
-            read(jobMetadata.getJobName());
+            jdbcTemplate.queryForObject("select * from job_metadata where job_name = ?", new Object[]{jobMetadata.getJobName()}, rowMapper);
         } catch (EmptyResultDataAccessException e) {
             jdbcTemplate.update("insert into job_metadata values (?, ?)", jobMetadata.getJobName(), 0);
         }
-        jdbcTemplate.update("insert into job_metadata (job_name, last_processed_row) values (?,?)", jobMetadata.getJobName(), jobMetadata.getLastProcessedRow());
+        jdbcTemplate.update("update job_metadata set job_name=?, last_processed_row=?", jobMetadata.getJobName(), jobMetadata.getLastProcessedRow());
     }
 }

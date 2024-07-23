@@ -1,5 +1,6 @@
 package org.example.springbatchdemo;
 
+import org.example.springbatchdemo.ws.CountryInfoClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

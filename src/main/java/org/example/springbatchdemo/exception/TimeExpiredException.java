@@ -1,4 +1,4 @@
-package org.example.springbatchdemo.batch;
+package org.example.springbatchdemo.exception;
 
 public class TimeExpiredException extends Exception {
 

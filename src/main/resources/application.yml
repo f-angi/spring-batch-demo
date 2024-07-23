@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: none
   datasource:
     mysql-one:
       url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/test

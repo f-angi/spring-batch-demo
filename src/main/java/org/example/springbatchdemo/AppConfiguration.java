@@ -2,10 +2,10 @@ package org.example.springbatchdemo;
 
 
 import org.example.springbatchdemo.batch.*;
+import org.example.springbatchdemo.ws.CountryInfoClient;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
-import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -17,16 +17,17 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
 @Configuration
+@EnableRetry(proxyTargetClass=true)
 public class AppConfiguration {
 
     @Bean
@@ -72,24 +73,6 @@ public class AppConfiguration {
     }
 
     @Bean
-    public Jaxb2Marshaller marshaller() {
-        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-        // this package must match the package in the <generatePackage> specified in
-        // pom.xml
-        marshaller.setContextPath("org.example.springbatchdemo.ws");
-        return marshaller;
-    }
-
-    @Bean
-    public CountryInfoClient countryInfoClient(Jaxb2Marshaller marshaller) {
-        CountryInfoClient client = new CountryInfoClient();
-        client.setDefaultUri("http://www.oorsprong.org/websamples.countryinfo");
-        client.setMarshaller(marshaller);
-        client.setUnmarshaller(marshaller);
-        return client;
-    }
-
-    @Bean
     @JobScope
     public CountryItemReader countryItemReader(RowMapper<Country> countryRowMapper, ElapsedTimeMonitoring elapsedTimeMonitoring,
                                                  @Value("#{jobExecutionContext['lastProcessedRow']}") int lastProcessedRow) {
@@ -112,7 +95,7 @@ public class AppConfiguration {
     @Bean(name = "countryJob")
     public Job getJob(JobRepository jobRepository,
                       @Qualifier("transactionManager") PlatformTransactionManager transactionManager, JobMetadataReaderTasklet tasklet,
-                      Step countryStep, StopJobTasklet stopJobTasklet) {
+                      Step countryStep) {
         var s1 = tasklet.getStep(jobRepository, transactionManager);
         var s2 = countryStep;
 //        var s3 = stopJobTasklet.getStep(jobRepository, transactionManager);
@@ -124,6 +107,8 @@ public class AppConfiguration {
 //                .build();
 
         return new JobBuilder("countryJob", jobRepository)
-                .start(s1).next(s2).build();
+                .start(s1)
+                .next(s2)
+                .build();
     }
 }
